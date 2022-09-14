@@ -1,0 +1,12 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "addpipeline"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-1h1id517i27s3"
+s3_prefix = "addpipeline"
+region = "ap-southeast-1"
+capabilities = "CAPABILITY_IAM"
+disable_rollback = true
+image_repositories = []
+confirm_changeset = true

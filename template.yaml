@@ -1,0 +1,137 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  codePipeLine2
+
+  Sample SAM Template for codePipeLine2
+  
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+    Tracing: Active
+  Api:
+    TracingEnabled: True
+
+Resources:
+  HelloWorldFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: hello-world/
+      Handler: app.lambdaHandler
+      Runtime: nodejs16.x
+      Architectures:
+        - x86_64
+      Events:
+        HelloWorld:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /hello
+            Method: get
+
+  MyRepo:
+    Type: AWS::CodeCommit::Repository
+    Properties:
+      RepositoryName: testRepo2
+      RepositoryDescription: This is a repository for my project with code from MySourceCodeBucket.
+      # Code:
+      #   BranchName: development
+      #   S3: 
+      #     Bucket: testBucket
+      #     Key: MyKey
+      #     ObjectVersion: 1
+
+  AppPipeline: 
+    Type: AWS::CodePipeline::Pipeline 
+    Properties: 
+      RoleArn:
+        Ref: CodePipelineServiceRole 
+      # Stages: 
+      #   - 
+      #     Name: Source 
+      #     Actions: 
+      #       - 
+      #         Name: SourceAction
+      #         ActionTypeId: 
+      #           Category: Source 
+      #           Owner: AWS 
+      #           Version: 1 
+      #           Provider: S3 
+      #         OutputArtifacts: 
+      #           - 
+      #             Name: SourceOutput 
+      #         Configuration: 
+      #           S3Bucket: 
+      #             Ref: MyRepo 
+      #           # S3ObjectKey: 
+      #           #   Ref: SourceS3ObjectKey 
+      #         RunOrder: 1 
+        # - 
+        #   Name: Beta 
+        #   Actions: 
+        #     - 
+        #       Name: BetaAction 
+        #       InputArtifacts: 
+        #         -
+        #           Name: SourceOutput 
+        #       ActionTypeId: 
+        #         Category: Deploy 
+        #         Owner: AWS 
+        #         Version: 1 
+        #         Provider: CodeDeploy
+        #       Configuration: 
+        #         ApplicationName: 
+        #           Ref: ApplicationName 
+        #         DeploymentGroupName: 
+        #           Ref: DeploymentGroupName 
+        #       RunOrder: 1 
+        # - 
+        #   Name: Release 
+        #   Actions: 
+        #     - 
+        #       Name: ReleaseAction
+        #       InputArtifacts: 
+        #         - 
+        #           Name: SourceOutput 
+        #       ActionTypeId: 
+        #         Category: Deploy 
+        #         Owner: AWS 
+        #         Version: 1
+        #         Provider: CodeDeploy 
+        #       Configuration: 
+        #         ApplicationName: 
+        #           Ref: ApplicationName
+        #         DeploymentGroupName: 
+        #           Ref: DeploymentGroupName 
+        #       RunOrder: 1 
+      # ArtifactStore: 
+      #   Type: S3 
+      #   Location:
+      #     Ref: MyRepo
+      #     # ArtifactStoreS3Location 
+      #   EncryptionKey:
+      #     Id: arn:aws:kms:useast-1:ACCOUNT-ID:key/KEY-ID
+      #     Type: KMS
+      # DisableInboundStageTransitions: 
+      #   - 
+      #     StageName: Release 
+      #     Reason: "Disabling the transition until integration tests are completed"
+      # Tags:
+      #   - Key: Project
+      #     Value: ProjectA
+      #   - Key: IsContainerBased
+      #     Value: 'true'         
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  HelloWorldApi:
+    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+  HelloWorldFunction:
+    Description: "Hello World Lambda Function ARN"
+    Value: !GetAtt HelloWorldFunction.Arn
+  HelloWorldFunctionIamRole:
+    Description: "Implicit IAM Role created for Hello World function"
+    Value: !GetAtt HelloWorldFunctionRole.Arn
